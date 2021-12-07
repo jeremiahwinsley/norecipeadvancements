@@ -45,19 +45,13 @@ public class MixinAdvancementManager {
         datapacks.forEach((location, jsonElement) -> {
             try {
                 JsonObject jsonobject = JSONUtils.convertToJsonObject(jsonElement, "advancement");
-
-                // skip loading recipe advancements
-//                if (jsonobject.has("rewards") && jsonobject.getAsJsonObject("rewards").has("recipes")){
-//                    recipeAdvancements.incrementAndGet();
-//                    return;
-//                }
-
                 Advancement.Builder advancement$builder = Advancement.Builder.fromJson(jsonobject, new ConditionArrayParser(location, this.predicateManager));
                 if (advancement$builder == null) {
                     LOGGER.debug("Skipping loading advancement {} as it's conditions were not met", location);
                     return;
                 }
 
+                // skip loading recipe advancements
                 if (advancement$builder.getCriteria().containsKey("has_the_recipe")) {
                     recipeAdvancements.incrementAndGet();
                     return;
