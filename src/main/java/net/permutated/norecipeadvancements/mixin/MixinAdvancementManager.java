@@ -6,14 +6,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
-import net.minecraft.advancements.AdvancementManager;
-import net.minecraft.advancements.AdvancementTreeNode;
-import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.loot.LootPredicateManager;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.advancements.TreeNodePosition;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.permutated.norecipeadvancements.NoRecipeAdvancements;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Mixin(AdvancementManager.class)
+@Mixin(ServerAdvancementManager.class)
 public class MixinAdvancementManager {
 
     @Final
@@ -36,16 +36,16 @@ public class MixinAdvancementManager {
 
     @Final
     @Shadow
-    private LootPredicateManager predicateManager;
+    private PredicateManager predicateManager;
 
     @Overwrite
-    protected void apply(Map<ResourceLocation, JsonElement> datapacks, IResourceManager resourceManager, IProfiler profiler) {
+    protected void apply(Map<ResourceLocation, JsonElement> datapacks, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, Advancement.Builder> map = Maps.newHashMap();
         AtomicInteger recipeAdvancements = new AtomicInteger();
         datapacks.forEach((location, jsonElement) -> {
             try {
-                JsonObject jsonobject = JSONUtils.convertToJsonObject(jsonElement, "advancement");
-                Advancement.Builder advancement$builder = Advancement.Builder.fromJson(jsonobject, new ConditionArrayParser(location, this.predicateManager));
+                JsonObject jsonobject = GsonHelper.convertToJsonObject(jsonElement, "advancement");
+                Advancement.Builder advancement$builder = Advancement.Builder.fromJson(jsonobject, new DeserializationContext(location, this.predicateManager));
                 if (advancement$builder == null) {
                     LOGGER.debug("Skipping loading advancement {} as it's conditions were not met", location);
                     return;
@@ -58,8 +58,8 @@ public class MixinAdvancementManager {
                 }
 
                 map.put(location, advancement$builder);
-            } catch (IllegalArgumentException | JsonParseException jsonparseexception) {
-                LOGGER.error("Parsing error loading custom advancement {}: {}", location, jsonparseexception.getMessage());
+            } catch (Exception exception) {
+                LOGGER.error("Parsing error loading custom advancement {}: {}", location, exception.getMessage());
             }
 
         });
@@ -70,7 +70,7 @@ public class MixinAdvancementManager {
 
         for(Advancement advancement : advancementlist.getRoots()) {
             if (advancement.getDisplay() != null) {
-                AdvancementTreeNode.run(advancement);
+                TreeNodePosition.run(advancement);
             }
         }
 

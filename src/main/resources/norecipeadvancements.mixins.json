@@ -1,9 +1,9 @@
 {
   "required": true,
   "package": "net.permutated.norecipeadvancements.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "norecipeadvancements.refmap.json",
-  "server": [
+  "mixins": [
     "MixinAdvancementManager"
   ],
   "minVersion": "0.8"
