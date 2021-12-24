@@ -5,6 +5,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import net.permutated.norecipeadvancements.filters.MissingAdvancementFilter;
+import net.permutated.norecipeadvancements.filters.UnknownRecipeCategoryFilter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +25,9 @@ public class NoRecipeAdvancements
 
         Logger rootLogger = LogManager.getRootLogger();
         if (rootLogger instanceof org.apache.logging.log4j.core.Logger) {
-            ((org.apache.logging.log4j.core.Logger) rootLogger).addFilter(new MissingAdvancementFilter());
+            org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) rootLogger;
+            logger.addFilter(new MissingAdvancementFilter());
+            logger.addFilter(new UnknownRecipeCategoryFilter());
         } else {
             LOGGER.error("Registration failed with unexpected class: {}", rootLogger.getClass());
         }
