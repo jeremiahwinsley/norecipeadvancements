@@ -3,7 +3,6 @@ package net.permutated.norecipeadvancements.mixin;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.TreeNodePosition;
@@ -15,7 +14,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.permutated.norecipeadvancements.NoRecipeAdvancements;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -25,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(ServerAdvancementManager.class)
-public class MixinAdvancementManager {
+public abstract class MixinAdvancementManager {
 
     @Final
     @Shadow
